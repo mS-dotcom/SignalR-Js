@@ -1,0 +1,78 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<br/>
+<br/>
+
+<center>
+<input type="text" id="user"  placeholder="user"/>
+<input type="text" id="message"  placeholder="message"/>
+<input class="btn btn-primary" type="button" id="btnSend" value="Send Message" />
+<br/>
+<br/>
+<ul id="messageList">
+<li></li>
+</ul>
+</center>
+<script>
+
+    $( document ).ready(function() {
+
+
+        const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/chathub")
+    .configureLogging(signalR.LogLevel.Information)
+    .build();
+
+async function start() {
+    try {
+        await connection.start();
+        alert("SignalR Connected.");
+    } catch (err) {
+        alert(err);
+        setTimeout(start, 5000);
+    }
+};
+
+connection.onclose(async () => {
+    await start();
+});
+
+// Start the connection.
+start();
+
+
+
+$( "#btnSend" ).click( async function() {
+    
+
+
+
+    var user=$('#user').val();
+    var message=$('#message').val();
+        try {
+    await connection.invoke("SendMessage", user, message);
+} catch (err) {
+    alert(err);
+}
+
+
+});
+
+
+
+
+    
+    connection.on("ReceiveMessage", (user,message) => {
+    const li = document.createElement("li");
+    li.textContent = `${user}: ${message}`;
+    document.getElementById("messageList").appendChild(li);
+});
+  console.log()
+
+    });
+
+
+</script>
